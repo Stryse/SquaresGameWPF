@@ -99,7 +99,7 @@ namespace SquaresGame.Persistence
                 }
                 return state;
 
-            } catch {
+            } catch(Exception e) {
                 throw new Exception("File not exists or invalid");
             }
         }
@@ -128,9 +128,10 @@ namespace SquaresGame.Persistence
                 {
                     //Writing players
                     Player p = state.PlayerOne;
-                    await writer.WriteLineAsync(String.Format("{0} {1} {2}",p.PlayerName,p.PlayerColor.ToString(),p.Points));
+                    ColorConverter colorConverter = new ColorConverter();
+                    await writer.WriteLineAsync(String.Format("{0} {1} {2}",p.PlayerName,colorConverter.ConvertToString(p.PlayerColor),p.Points));
                     p = state.PlayerTwo;
-                    await writer.WriteLineAsync(String.Format("{0} {1} {2}", p.PlayerName, p.PlayerColor.ToString(), p.Points));
+                    await writer.WriteLineAsync(String.Format("{0} {1} {2}", p.PlayerName,colorConverter.ConvertToString(p.PlayerColor), p.Points));
 
                     //ActivePlayerInd and FieldSize
                     int activeP = (state.ActivePlayer == state.PlayerOne) ? 0 : 1;

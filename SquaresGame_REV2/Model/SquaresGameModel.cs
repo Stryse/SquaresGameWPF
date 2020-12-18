@@ -40,8 +40,8 @@ namespace SquaresGame.Model
     }
     public class Player
     {
-        public String PlayerName  { get; private set; }
-        public Color  PlayerColor { get; private set; }
+        public String PlayerName  { get; set; }
+        public Color  PlayerColor { get; set; }
         public int    Points      { get; set; }
 
         public Player(String pName, Color pColor, int points)

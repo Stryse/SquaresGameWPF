@@ -26,8 +26,8 @@
                     <MenuItem Header="5x5" Command="{Binding NewGameCommand}" CommandParameter="5"></MenuItem>
                     <MenuItem Header="7x7" Command="{Binding NewGameCommand}" CommandParameter="7"></MenuItem>
                 </MenuItem>
-                <MenuItem x:Name="SaveGame" Header="Save Game"></MenuItem>
-                <MenuItem x:Name="LoadGame" Header="Load Game"></MenuItem>
+                <MenuItem x:Name="SaveGame" Header="Save Game" Command="{Binding SaveCommand}"></MenuItem>
+                <MenuItem x:Name="LoadGame" Header="Load Game" Command="{Binding LoadCommand}"></MenuItem>
             </MenuItem>
         </Menu>
         <DockPanel Grid.Row="1" Height="40" Background="DarkBlue">

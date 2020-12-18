@@ -1,4 +1,5 @@
-﻿using SquaresGame.Model;
+﻿using Microsoft.Win32;
+using SquaresGame.Model;
 using SquaresGame.Persistence;
 using System;
 using System.Collections.Generic;
@@ -33,15 +34,17 @@ namespace SquaresGame_REV2.ViewModel
         public DelegateCommand SelectFirstDot { get; set; }
         public DelegateCommand SelectSecondDot { get; set; }
         public DelegateCommand NewGameCommand { get; set; }
+        public DelegateCommand SaveCommand { get; set; }
+        public DelegateCommand LoadCommand { get; set; }
 
         //CTOR
         public MainWindowViewModel()
         {
             //DEFAULT SETTINGS
-            FieldSize = 5;
+            FieldSize = 3;
             dotRadius = 15;
-            playerOne = new PlayerViewModel(new Player("Player One", Colors.Coral),Colors.Coral);
-            playerTwo = new PlayerViewModel(new Player("Player Two", Colors.Green),Colors.Green);
+            playerOne = new PlayerViewModel(new Player("PlayerOne", Colors.Coral),Colors.Coral);
+            playerTwo = new PlayerViewModel(new Player("PlayerTwo", Colors.Green),Colors.Green);
 
             persistence = new SquaresGameDataAccess();
             model = new SquaresGameModel(FieldSize, playerOne.Player, playerTwo.Player, persistence);
@@ -53,6 +56,8 @@ namespace SquaresGame_REV2.ViewModel
             SelectFirstDot = new DelegateCommand(HandleFirstDotClicked);
             SelectSecondDot = new DelegateCommand(HandleSecondDotClicked);
             NewGameCommand = new DelegateCommand(NewGame);
+            SaveCommand = new DelegateCommand(o => SaveGame());
+            LoadCommand = new DelegateCommand(o => LoadGame());
 
             InitDots(FieldSize);
         }
@@ -202,6 +207,54 @@ namespace SquaresGame_REV2.ViewModel
             model.EndGame += PlayerWon;
             Shapes.Clear();
             InitDots(FieldSize);
+        }
+
+        public async void SaveGame()
+        {
+            SaveFileDialog saveDialog = new SaveFileDialog();
+
+            if (saveDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    await model.SaveGameAsync(saveDialog.FileName);
+                    System.Windows.MessageBox.Show("Game saved!");
+                }
+                catch (Exception excp)
+                {
+                    System.Windows.MessageBox.Show(excp.Message);
+                }
+            }
+        }
+
+        public async void LoadGame()
+        {
+            OpenFileDialog openDialog = new OpenFileDialog();
+            if (openDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    if (model == null)
+                    {
+                        GameStateWrapper state = await persistence.LoadGameAsync(openDialog.FileName);
+                        model = SquaresGameModel.FromSave(state, persistence);
+                        NewGame(model);
+                    }
+                    else
+                    {
+                        await model.LoadGameAsync(openDialog.FileName);
+                        PlayerOne.Player = model.PlayerOne;
+                        PlayerTwo.Player = model.PlayerTwo;
+                    }
+                    FieldSize = model.FieldSize;
+                    InitDots(FieldSize);
+                    UpdateUI(this, EventArgs.Empty);
+                }
+                catch (Exception excp)
+                {
+                    System.Windows.MessageBox.Show(excp.Message);
+                }
+            }
         }
 
         //PROPERTIES
