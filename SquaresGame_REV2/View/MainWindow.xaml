@@ -1,0 +1,153 @@
+﻿<Window x:Class="SquaresGame_REV2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SquaresGame_REV2"
+        xmlns:vm="clr-namespace:SquaresGame_REV2.ViewModel"
+        xmlns:converters="clr-namespace:SquaresGame_REV2.ViewModel.Converters"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="680" Width="600"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <converters:DotClickConverter x:Key="DotClickConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <Menu Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem x:Name="NewGame" Header="New Game">
+                    <MenuItem Header="3x3" Command="{Binding NewGameCommand}" CommandParameter="3"></MenuItem>
+                    <MenuItem Header="5x5" Command="{Binding NewGameCommand}" CommandParameter="5"></MenuItem>
+                    <MenuItem Header="7x7" Command="{Binding NewGameCommand}" CommandParameter="7"></MenuItem>
+                </MenuItem>
+                <MenuItem x:Name="SaveGame" Header="Save Game"></MenuItem>
+                <MenuItem x:Name="LoadGame" Header="Load Game"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <DockPanel Grid.Row="1" Height="40" Background="DarkBlue">
+            <Label DockPanel.Dock="Left" Foreground="{Binding PlayerOne.Color}"
+                   FontWeight="Bold" FontSize="20" Content="{Binding PlayerOne.Player.PlayerName}"></Label>
+
+            <Label DockPanel.Dock="Left" Foreground="Yellow" HorizontalAlignment="Right"
+                   FontWeight="Bold" FontSize="20" Margin="40 0 0 0" Content="{Binding PlayerOne.Player.Points}"></Label>
+
+            <Label DockPanel.Dock="Right" Foreground="{Binding PlayerTwo.Color}" HorizontalAlignment="Right"
+                   FontWeight="Bold" FontSize="20" Content="{Binding PlayerTwo.Player.PlayerName}"></Label>
+
+            <Label DockPanel.Dock="Right" Foreground="Yellow" HorizontalAlignment="Right"
+                   FontWeight="Bold" FontSize="20" Margin="0 0 40 0" Content="{Binding PlayerTwo.Player.Points}"></Label>
+        </DockPanel>
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding Shapes.Dots}">
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="FrameworkElement">
+                    <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                    <Setter Property="Canvas.Top" Value="{Binding Top}"/>
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Ellipse
+                             Width="{Binding Radius}"
+                             Height="{Binding Radius}"
+                        >
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="Red"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="Fill" Value="LightGreen"/>
+                                    </DataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Fill" Value="Yellow"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                        <Ellipse.InputBindings>
+                            <MouseBinding
+                                Command="{Binding DataContext.SelectFirstDot,RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                Gesture="LeftClick">
+                                <MouseBinding.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource DotClickConverter}">
+                                    <Binding Path="Row"/>
+                                    <Binding Path="Col"/>
+                                </MultiBinding>
+                                </MouseBinding.CommandParameter>
+                            </MouseBinding>
+                            <MouseBinding
+                                Command="{Binding DataContext.SelectSecondDot,RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                Gesture="RightClick">
+                                <MouseBinding.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource DotClickConverter}">
+                                        <Binding Path="Row"/>
+                                        <Binding Path="Col"/>
+                                    </MultiBinding>
+                                </MouseBinding.CommandParameter>
+                            </MouseBinding>
+                        </Ellipse.InputBindings>
+                    </Ellipse>
+                </DataTemplate>    
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas IsItemsHost="True" Background="Transparent" Width="600" Height="600"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            
+        </ItemsControl>
+
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding Shapes.Lines}" Panel.ZIndex="-2">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Line
+                        X1="{Binding Left1}" Y1="{Binding Top1}"
+                        X2="{Binding Left2}" Y2="{Binding Top2}"
+                        StrokeThickness="4"
+                        Stroke="{Binding Color}"
+                        >
+                    </Line>
+                </DataTemplate>    
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas IsItemsHost="True" Background="Transparent" Width="600" Height="600"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            
+        </ItemsControl>
+
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding Shapes.Rectangles}" Panel.ZIndex="-3">
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="FrameworkElement">
+                    <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                    <Setter Property="Canvas.Top" Value="{Binding Top}"/>
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Rectangle
+                        Width="{Binding Width}"
+                        Height="{Binding Height}"
+                        Fill="{Binding Color}"
+                        >
+                    </Rectangle>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas IsItemsHost="True" Background="Aqua" Width="600" Height="600"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+        </ItemsControl>
+
+    </Grid>
+</Window>
