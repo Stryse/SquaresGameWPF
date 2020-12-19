@@ -1,0 +1,28 @@
+@startuml
+top to bottom direction
+
+actor Játékos as Player
+usecase (Új játék) as NewGame
+usecase (Játék mentése) as SaveGame
+usecase (Játék betöltése) as LoadGame
+usecase (Kilépés) as Quit
+
+usecase (Fájl tallózása) as Browse
+usecase (Lépés) as Step
+usecase (Játék vége) as GameOver
+
+Player -- NewGame
+Player -- Step
+Player -- SaveGame
+Player -- LoadGame
+Player -Quit
+
+
+SaveGame --> Browse : <<include>>
+LoadGame --> Browse : <<include>>
+
+NewGame --> Step : <<precedes>>
+LoadGame --> Step : <<precedes>>
+
+Step --> GameOver : <<invokes>>
+@enduml

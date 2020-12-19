@@ -1,0 +1,168 @@
+@startuml
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class "**Program**" as Program
+{
+-Main() : void
+}
+
+class "**View::GameWindow**" as GameWindow <Form>
+{
+-model : SquaresGameModel
+-dataAccess : ISquaresGameDataAccess
+-dotRadius : const float
+-lineWidth : const float
+-dots : Dot[,]
+-isMouseDown : bool
+-startClickDot : Dot
+-endClickDot : Dot
+==
++GameWindow()
+-DrawGameField(e : PaintEventArgs) : void
+-InitDots(N : int) : void
+-GetIntersectedDot(e : MouseEventArgs) : Dot
+-UpdateUI(sender : object, e : EventArgs) : void
+-PlayerWon(sender : object, p : Player) : void
+-GameWindow_Load(sender : object, e : EventArgs) : void
+-newGameBtn_Click(sender : object, e : EventArgs) : void
+-NewGame(model : SquaresGameModel) : void
+-canvas_Paint(sender : object, e : PaintEventArgs) : void
+-canvas_MouseDown(sender : object, e : MouseEventArgs) : void
+-canvas_MouseUp(sender : object, e : MouseEventArgs) : void
+-canvas_MouseMove(sender : object, e : MouseEventArgs) : void
+-canvas_DragEnter(sender : object, e : DragEventArgs) : void
+#CreateParams : CreateParams {override}
+-- <<async>> --
+-LoadGame(path : String) : Task
+-saveGameBtn_Click(sender : object, e : EventArgs) : void
+-loadGameBtn_Click(sender : object, e : EventArgs) : void
+-canvas_DragDrop(sender : object, e : DragEventArgs) : void
+}
+
+class "**View::Dot**" as Dot
+{
++ row : int
++ col : int
++ xCoord : float
++ yCoord : float
++{static} {explicit} operator PointF(d : Dot) : PointF
++{static} {explicit} operator Point(d : Dot) : Point
+}
+
+class "**View::GameStarter**" as GameStarter <Form>
+{
+-fieldSize : int
+-players : Player[]
+-p1Name : String
+-p1Color : Color
+-p2Name : String
+-p2Color : Color
+==
++GameStarter()
+-GameStarter_Load(sender : object, e : EventArgs) : void
+-p1ColorBtn_Click(sender : object, e : EventArgs) : void
+-p1ColorBtn_Click(sender : object, e : EventArgs) : void
+-setPlayerColor(colorBtn : Button, c : ref Color) : void
+-cancelBtn_Click(sender : object, e : EventArgs) : void
+-okBtn_Click(sender : object, e : EventArgs) : void
+-CheckPlayersValidity(p1 : Player, p2 : Player) : bool
+#OnPlayersCreated(sender : object, players : Player[]) : void {virtual}
+-radio3_CheckedChanged(sender : object, e : EventArgs) : void
+-radio5_CheckedChanged(sender : object, e : EventArgs) : void
+-radio9_CheckedChanged(sender : object, e : EventArgs) : void
+-- <<event>> --
++ PlayerCreated() : EventHandler<Tuple<Player[],int>>
+}
+
+class "**Model::Player**" as Player {
+-playerName : String
+-playerColor : Color
+-points : int
+==
++Player(pName : String, pColor : Color, points : int)
++Player(pName : String, pColor : Color)
+-- <<property>> --
++PlayerName() : String
++PlayerColor() : Color
++Points() : int
+}
+
+class "**Model::SquaresGameModel**" as SquaresGameModel {
+-lines : List<Tuple<Point, Point, Player>>
+-linesToEnd : int
+-rectangles : List<Tuple<Point, Point, Player>>
+-registeredRectCount : int
+-dataAccess : ISquaresGameDataAccess
+-- <<properties>> --
++FieldSize : int
++PlayerOne : Player
++PlayerTwo : Player
++ActivePlayer : Player
++GameEnded : bool
++Lines : IReadOnlyList<Tuple<Point,Point,Player>>
++Rectangles : IReadOnlyList<Tuple<Point,Point,Player>>
+-- <<events>> --
++UpdateUI() : EventHandler
++EndGame() : EventHander<Player>
+==
++SquaresGameModel(fieldSize : int, playerOne : Player
+                  playerTwo : Player, dAccess : ISquaresGameDataAccess)
++{static} FromSave(state : GameStateWrapper, dAccess : ISquaresGameDataAccess)
++AddNewLine(line : Tuple<Point, Point>) : void
++AddNewLine(a : Point, b : Point) : void
++Restart() : void
+-ChangeActivePlayer() : void
+-SanitizeLine(line : Tuple<Point, Point>) : Tuple<Point, Point>
+-UpdateRectangles(line : Tuple<Point, Point>) : void
+-PointsToRectangle(points : Point[]) : Tuple<Point,Point>
+-IsScored() : bool
+-RegisterPoints() : void
+-CalcLinesToEnd() : int
+-CheckWinCondition() : bool
+-IsLine(line : Tuple<Point,Point>) : bool
+-IsSameLine(p1 : Tuple<Point,Point>, p2 : Tuple<Point,Point>) : bool
+-IsPermittedLine(Tuple<Point,Point> line) : bool
+#OnUpdateUI(sender : object, e : EventArgs) : void {virtual}
+#OnEndGame(sender : object, p : Player) : void {virtual}
+}
+
+interface "**Persistence::ISquaresGameDataAccess**" as ISquaresGameDataAccess{
++SaveGameAsync(state : GameStateWrapper, path : String) : Task
++LoadGameAsync(path : String) : Task<GameStateWrapper>
+}
+
+class "**Persistence::SquaresGameDataAccess**" as SquaresGameDataAccess{
++SaveGameAsync(state : GameStateWrapper, path : String) : Task
++LoadGameAsync(path : String) : Task<GameStateWrapper>
+}
+
+class "**Persistence::SquaresGameDataException**" as excpt
+
+class "**Persistence::GameStateWrapper**" as GameStateWrapper
+{
+-- <<properties>> --
++PlayerOne() : Player
++PlayerTwo() : Player
++ActivePlayer() : Player
++Lines() : List<Tuple<Point, Point, Player>>
++Rectangles() : List<Tuple<Point, Point, Player>>
++RegisteredRectCount() : int
++FieldSize() : int
++GameStateWrapper();
+}
+
+Program -> GameWindow
+GameWindow *- Dot
+GameWindow --> GameStarter
+GameWindow *-- SquaresGameModel
+SquaresGameModel *- Player
+ISquaresGameDataAccess <|-r- SquaresGameDataAccess
+GameWindow *-- ISquaresGameDataAccess
+SquaresGameModel *-- ISquaresGameDataAccess
+SquaresGameDataAccess -> excpt
+SquaresGameModel -l-> GameStateWrapper
+ISquaresGameDataAccess -l-> GameStateWrapper
+
+@enduml

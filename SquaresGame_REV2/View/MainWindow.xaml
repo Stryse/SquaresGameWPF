@@ -78,7 +78,7 @@
                                     <MultiBinding Converter="{StaticResource DotClickConverter}">
                                     <Binding Path="Row"/>
                                     <Binding Path="Col"/>
-                                </MultiBinding>
+                                    </MultiBinding>
                                 </MouseBinding.CommandParameter>
                             </MouseBinding>
                             <MouseBinding

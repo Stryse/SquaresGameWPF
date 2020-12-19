@@ -1,0 +1,112 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+class ViewModelBase <INotifyPropertyChanged> {
+# ViewModelBase()
+# OnPropertyChanged(String) : void
+-- <<events>> --
++ PropertyChanged() : PropertyChangedEventHandler
+}
+
+class MainWindowViewModel {
+- fieldSize : int
+- dotRadius : double
+- canvasWidth : double
+- canvasHeight : double
+- startClickDot : DotViewModel
+- endClickDot : DotViewModel
+- model : SquaresGameModel
+- persistence : SquaresGameDataAccess
+- playerOne : PlayerViewModel
+- playerTwo : PlayerViewModel
+-- <<Properties>> --
++ Shapes : ShapeWrapper
++ PlayerOne : PlayerViewModel
++ PlayerTwo : PlayerViewModel
++ FieldSize : int
++ DotSize : double
++ SelectFirstDot : DelegateCommand
++ SelectSecondDot : DelegateCommand
++ NewGameCommand : DelegateCommand
++ SaveCommand : DelegateCommand
++ LoadCommand : DelegateCommand
+--
++MainWindowViewModel()
+- InitDots(int) : void
++ HandleFirstDotClicked(object) : void
++ HandleSecondDotClicked(object) : void
++ IsValidEndPoint(int,int) : bool
+- UpdateUI(object,EventArgs) : void
+- void PlayerWon(object,EventArgs) : void
+- NewGame(object: : void
+-- <<Async>> --
++ SaveGame() : void
++ LoadGame() : void
+}
+
+class DelegateCommand <ICommand> {
+- _execute : Action<Object> {readOnly}
+- _canExecute : Func<Object,Boolean> {readOnly}
++ DelegateCommand(Action<Object>)
++ DelegateCommand(Func<Object,Boolean>, Action<Object)
++ Execute(Object) : Boolean
++ RaiseCanExecuteChanged() : void
+-- <<event>> --
++ CanExecuteChanged() : EventHandler
+}
+
+class ShapeWrapper {
+-- <<Properties>> --
++ Dots : ObservableCollection<DotViewModel>
++ Lines : ObservableCollection<LineViewModel>
++ Rectangles : ObservableCollection<RectangleViewModel>
+--
++ Clear() : void
+}
+
+class PlayerViewModel {
+-- <<Properties>> --
++Player : Player
++Color : SolidColorBrush
+--
++Player(Player,SolidColorBrush)
+}
+  
+class DotViewModel {
+-- <<Properties>> --
++ Left : double
++ Top : double
++ Radius : double
++ Row : int
++ Col : int
++ IsSelected : bool
+--
++ DotViewModel(double,double,int,int,double)
+}
+
+class LineViewModel {
+-- <<Properties>> --
++ Left1 : double
++ Top 1: double
++ Row1 : int
++ Col1 : int
++ Left2 : double
++ Top2: double
++ Row2 : int
++ Col2 : int
+--
++ LineViewModel(double,double,int,int,double,double,int,int)
+}
+  
+ViewModelBase <|-r- MainWindowViewModel
+MainWindowViewModel *-- DelegateCommand
+MainWindowViewModel *-- PlayerViewModel
+MainWindowViewModel *-- ShapeWrapper
+ShapeWrapper *-- DotViewModel
+ViewModelBase <|-- DotViewModel
+ViewModelBase <|-- LineViewModel
+ViewModelBase <|-- PlayerViewModel
+
+ShapeWrapper *-- LineViewModel
+@enduml
